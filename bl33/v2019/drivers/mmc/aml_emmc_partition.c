@@ -1619,6 +1619,15 @@ static inline char * get_part_name(struct partitions *part, int num)
     return (char *)part[num].name;
 }
 
+struct partitions *aml_ept_table(int *count)
+{
+	if (!p_iptbl_ept || p_iptbl_ept->count <= 0)
+		return NULL;
+	if (count)
+		*count = p_iptbl_ept->count;
+	return p_iptbl_ept->partitions;
+}
+
 int get_part_info_from_tbl(struct blk_desc *dev_desc,
 	int num, disk_partition_t *info)
 {

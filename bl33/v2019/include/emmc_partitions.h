@@ -278,6 +278,7 @@ extern int get_emmc_partition_arraysize(void);
 extern int get_partition_num_by_name(char const *name);
 extern int aml_gpt_valid(struct mmc *mmc);
 
+struct partitions *aml_ept_table(int *count);
 struct partitions* find_mmc_partition_by_name (char const *name);
 struct partitions *aml_get_partition_by_name(const char *name);
 int mmc_boot_size(char *name, uint64_t* size);
