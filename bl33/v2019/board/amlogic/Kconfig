@@ -813,6 +813,12 @@ config SC2_AH212_LPDDR4
 	help
 	  Select SC2 AH212 LPDDR4 config
 
+config SC2_VONTARX4
+	bool "SC2_VONTARX4"
+	select TARGET_SC2_VONTARX4
+	help
+	  Select SC2 Vontar X4 config
+
 endchoice
 
 config TARGET_SC2_SKT
@@ -846,6 +852,10 @@ config TARGET_SC2_AH212_LPDDR3
 config TARGET_SC2_AH212_LPDDR4
 	bool "SC2 AH212 lpddr4 board"
 	depends on SC2_AH212_LPDDR4
+
+config TARGET_SC2_VONTARX4
+	bool "SC2 Vontar X4 board"
+	depends on SC2_VONTARX4
 
 endif
 
@@ -1294,6 +1304,8 @@ source "board/amlogic/sc2_ah212_ddr3/Kconfig"
 source "board/amlogic/sc2_ah212_lpddr3/Kconfig"
 
 source "board/amlogic/sc2_ah212_lpddr4/Kconfig"
+
+source "board/amlogic/sc2_vontarx4/Kconfig"
 
 source "board/amlogic/c2_skt/Kconfig"
 

@@ -1,0 +1,16 @@
+# sc2_vontarx4
+
+Amlogic SC2 (S905X4) board. Build it like any other board in this tree:
+
+```
+export CROSS_COMPILE=/opt/toolchains/gcc-linaro-7.3.1-2018.05-i686_aarch64-elf/bin/aarch64-elf-
+export PATH="/opt/toolchains/gcc-linaro-7.3.1-2018.05-i686_aarch64-elf/bin:/opt/toolchains/xpack-riscv-none-embed-gcc-8.3.0-1.2/bin:${PATH}"
+./fip/mk sc2_vontarx4 --avb2 --testkey
+```
+
+That writes `bl33/v2019/build/u-boot.bin.signed`, next to the unsigned
+`u-boot.bin`. Device ACS comes from
+`firmware/timing.c` (DDR3, 32-bit rank0, 672 MHz, matching stock
+dvinit-params). `SC2_VONTARX4` must be in `board/amlogic/Kconfig` or
+`fip/mk` still compiles `sc2_skt` env. ATV14 BL2E still does not hand
+off to GKI, so device packaging overlays stock BBST+BL2E+BL2X.
