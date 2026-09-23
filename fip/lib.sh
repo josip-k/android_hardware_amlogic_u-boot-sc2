@@ -208,8 +208,13 @@ function get_blx_bin() {
 				dbg "blxbin:${DATA[0]} blxsrc:  ${DATA[2]}"
 				dbg "blxbin:${DATA[0]} blxsrc-s:${DATA[2]:0:7}"
 				# reset to history version
+				# git -C walks up to this U-Boot repo when bl2/bin has no
+				# .git of its own, and reset --hard then drops local board
+				# Kconfig on every ./fip/mk. Only reset a real bin.git checkout.
 				#git --git-dir ${BLX_BIN_FOLDER[index]}/.git --work-tree=${BLX_BIN_FOLDER[index]} reset ${DATA[0]} --hard
-				git_operate2 ${BLX_BIN_FOLDER[index]} reset ${DATA[0]} --hard
+				if [ -e "${BLX_BIN_FOLDER[index]}/.git" ]; then
+					git_operate2 ${BLX_BIN_FOLDER[index]} reset ${DATA[0]} --hard
+				fi
 				# copy binary file
 				if [ "bl32" == "${BLX_NAME[$index]}" ]; then
 					# bl32 is optional
@@ -259,7 +264,9 @@ function get_blx_bin() {
 				if [ 0 -ne ${line_num} ]; then
 					# this is not latest version, can do reset. latest version doesn't have 'git reflog'
 					#git --git-dir ${BLX_BIN_FOLDER[index]}/.git --work-tree=${BLX_BIN_FOLDER[index]} reset 'HEAD@{1}' --hard
-					git_operate2 ${BLX_BIN_FOLDER[index]} reset 'HEAD@{1}' --hard
+					if [ -e "${BLX_BIN_FOLDER[index]}/.git" ]; then
+						git_operate2 ${BLX_BIN_FOLDER[index]} reset 'HEAD@{1}' --hard
+					fi
 				fi
 				break
 			fi
