@@ -35,6 +35,11 @@ static const unsigned char lz4_magic[] = {
 	0x04, 0x22, 0x4d, 0x18
 };
 
+/* Android/Linux Image.lz4 is produced with `lz4 -l` (legacy archive). */
+static const unsigned char lz4_legacy_magic[] = {
+	0x02, 0x21, 0x4c, 0x18
+};
+
 static char andr_tmp_str[ANDR_BOOT_ARGS_SIZE + 1];
 
 static struct {
@@ -44,7 +49,8 @@ static struct {
 } arrComp[] = {
 	{lzop_magic,9,IH_COMP_LZO},
 	{gzip_magic,2,IH_COMP_GZIP},
-	{lz4_magic, 4, IH_COMP_LZ4}
+	{lz4_magic, 4, IH_COMP_LZ4},
+	{lz4_legacy_magic, 4, IH_COMP_LZ4}
 };
 
 /* android R*/

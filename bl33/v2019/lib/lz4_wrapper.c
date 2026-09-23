@@ -7,6 +7,7 @@
 #include <compiler.h>
 #include <linux/kernel.h>
 #include <linux/types.h>
+#include <asm/unaligned.h>
 
 static u16 LZ4_readLE16(const void *src) { return le16_to_cpu(*(u16 *)src); }
 static void LZ4_copy4(void *dst, const void *src) { *(u32 *)dst = *(u32 *)src; }
@@ -24,6 +25,8 @@ typedef uint64_t U64;
 #include "lz4.c"	/* #include for inlining, do not link! */
 
 #define LZ4F_MAGIC 0x184D2204
+/* Linux / Android Image.lz4 (lz4 -l), see lib/decompress_unlz4.c */
+#define LZ4_LEGACY_MAGIC 0x184C2102
 
 struct lz4_frame_header {
 	u32 magic;
@@ -62,6 +65,45 @@ struct lz4_block_header {
 	/* + u32 block_checksum iff has_block_checksum is set */
 } __packed;
 
+static int ulz4fn_legacy(const void *src, size_t srcn, void *dst, size_t *dstn)
+{
+	const u8 *in = src + sizeof(u32);	/* magic checked by caller */
+	const u8 *in_end = src + srcn;
+	u8 *out = dst;
+	u8 *out_end = out + *dstn;
+	int ret = 0;
+
+	while (in + sizeof(u32) <= in_end) {
+		u32 chunksize = get_unaligned_le32(in);
+		int n;
+
+		in += sizeof(u32);
+		/* Concatenated legacy archives repeat the magic. */
+		if (chunksize == LZ4_LEGACY_MAGIC)
+			continue;
+		if (!chunksize)
+			break;
+		if (chunksize > in_end - in) {
+			ret = -EINVAL;	/* input overrun */
+			break;
+		}
+
+		/* constant folding essential, do not touch params! */
+		n = LZ4_decompress_generic((const char *)in, (char *)out,
+					   chunksize, out_end - out, endOnInputSize,
+					   full, 0, noDict, out, NULL, 0);
+		if (n < 0) {
+			ret = -EPROTO;	/* decompression error */
+			break;
+		}
+		out += n;
+		in += chunksize;
+	}
+
+	*dstn = out - (u8 *)dst;
+	return ret;
+}
+
 int ulz4fn(const void *src, size_t srcn, void *dst, size_t *dstn)
 {
 	const void *end = dst + *dstn;
@@ -69,6 +111,11 @@ int ulz4fn(const void *src, size_t srcn, void *dst, size_t *dstn)
 	void *out = dst;
 	int has_block_checksum;
 	int ret;
+
+	/* Dispatch before clearing *dstn: it holds the output capacity. */
+	if (srcn >= sizeof(u32) && get_unaligned_le32(src) == LZ4_LEGACY_MAGIC)
+		return ulz4fn_legacy(src, srcn, dst, dstn);
+
 	*dstn = 0;
 
 	{ /* With in-place decompression the header may become invalid later. */
