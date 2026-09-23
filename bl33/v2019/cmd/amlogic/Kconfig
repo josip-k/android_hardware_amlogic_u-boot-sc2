@@ -57,6 +57,14 @@ config CMD_BOOTCTOL_AVB
 	help
 	  support avb related cmds
 
+config CMD_BOOTCTOL_VAB
+	bool "virtual A/B boot control"
+	depends on CMD_BOOTCTOL_AVB
+	default n
+	help
+	  Store slot metadata as Android bootloader_control with a
+	  little-endian CRC. The AvbABData record is not written.
+
 config CMD_CAR_PARAMS
 	bool "used to read car camera params"
 	default n
