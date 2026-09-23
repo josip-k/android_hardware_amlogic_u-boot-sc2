@@ -8,7 +8,9 @@ declare UBOOT_VERSION2="v2019"
 export UBOOT_VERSION1 UBOOT_VERSION2
 
 # build environment
-BUILD_FOLDER="build/"
+# Final images are copied into the BL33 output directory
+# (bl33/<ver>/build/, see mk_script.sh). That is the U-Boot O= tree.
+BUILD_FOLDER=""
 FIP_FOLDER="fip/"
 MANIFEST=".repo/manifest.xml"
 FIP_BUILD_FOLDER="fip/_tmp/"

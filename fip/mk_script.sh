@@ -247,8 +247,6 @@ function clean() {
 	fi
 	cd ${MAIN_FOLDER}
 	rm ${FIP_BUILD_FOLDER} -rf
-	rm ${BUILD_FOLDER}/* -rf
-	mkdir -p ${BUILD_FOLDER}
 	return
 }
 
@@ -265,6 +263,15 @@ function build() {
 	    export BOARD_COMPILE_HDMITX_ONLY=null
 	fi
 	pre_build_uboot $@
+
+	# Signed images go next to u-boot.bin. bl33/<ver>/.gitignore
+	# already ignores that directory, same as a normal U-Boot build.
+	if [ -z "${BL33_BUILD_FOLDER}" ]; then
+		echo "BL33 output directory was not selected"
+		exit -1
+	fi
+	BUILD_FOLDER="${BL33_BUILD_FOLDER}"
+	export BUILD_FOLDER
 
 	# variable init depends on uboot .config
 	init_variable_early $@
